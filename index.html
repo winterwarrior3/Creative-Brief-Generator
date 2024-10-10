@@ -3,303 +3,589 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creative Brief Generator</title>
+    <title>Creative Brief Generator with Enhanced Display</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
             margin: 0;
-            padding: 0;
-        }
-        #container {
-            max-width: 600px;
-            margin: 50px auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        select, button {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            background-color: #007bff;
+            background-color: #3498db;
             color: white;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
-            border-radius: 5px;
+            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #2980b9;
         }
         #brief {
             margin-top: 20px;
-            font-size: 18px;
-            text-align: left;
-            background-color: #ffffff;
+            background-color: #ecf0f1;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        #brief b {
-            display: block;
-            margin-top: 10px;
-            font-size: 1.1em;
-            color: #007bff;
+        #brief h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-        #brief div {
+        #brief p {
             margin-bottom: 15px;
         }
+        #brief strong {
+            color: #2c3e50;
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        #downloadPdf {
+            background-color: #27ae60;
+            display: none;
+        }
+        #downloadPdf:hover {
+            background-color: #2ecc71;
+        }
+        #previousBrief {
+            background-color: #e67e22;
+            display: none;
+        }
+        #previousBrief:hover {
+            background-color: #d35400;
+        }
+        #placeholderMessage {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <div id="container">
+    <div class="container">
         <h1>Creative Brief Generator</h1>
-        <label for="brandType">Select Brand Type:</label>
-        <select id="brandType">
-            <option value="tech">Tech</option>
-            <option value="fashion">Fashion</option>
-            <option value="lifestyle">Lifestyle</option>
-            <option value="beverage">Beverage</option>
+        <select id="industrySelect">
+            <option value="all">All Industries</option>
+            <option value="tech">Technology</option>
+            <option value="apparel">Apparel</option>
             <option value="automotive">Automotive</option>
+            <option value="travel">Travel</option>
+            <option value="food">Food</option>
         </select>
-        <br><br>
-        <label for="mediumType">Select Medium Type:</label>
-        <select id="mediumType">
-            <option value="video">Film/Video</option>
-            <option value="digital">Digital Ad</option>
-            <option value="print">Print Ad</option>
-            <option value="social_media">Social Media Campaign</option>
-            <option value="billboard">Billboard</option>
-        </select>
-        <h1>Creative Brief Generator</h1>
         <button onclick="generateBrief()">Generate Creative Brief</button>
+        <button id="downloadPdf" onclick="downloadPDF()">Download PDF</button>
+        <button id="previousBrief" onclick="showPreviousBrief()">Previous Brief</button>
+        <div id="placeholderMessage">No brief generated yet. Click 'Generate Creative Brief' to create one.</div>
         <div id="brief"></div>
-        <button id="downloadButton" onclick="exportToPDF()" style="display: none; margin-top: 20px; padding: 15px 25px;">Download as PDF</button>
     </div>
     <script>
-        const brands = [
-            "Apple", "Microsoft", "Google", "Amazon", "Facebook", "Intel", "IBM", "NVIDIA", "Oracle", "Cisco",
-            "HP", "Dell", "Salesforce", "SAP", "Adobe", "Twitter", "Spotify", "Slack", "Zoom", "Dropbox",
-            "Snapchat", "LinkedIn", "TikTok", "PayPal", "Square", "Pinterest", "Reddit", "Shopify", "Cloudflare", "Asana",
-            "VMware", "GitHub", "Tesla", "SpaceX", "Sony", "Samsung", "LG", "Xiaomi", "Huawei", "Qualcomm",
-            "AMD", "Roku", "Peloton", "Epic Games", "Unity", "Electronic Arts", "Twitch", "Netflix", "Spotify", "Alibaba"
+        const briefs = [
+            // Technology Industry
+            {
+                brand: "Apple",
+                industry: "tech",
+                painPoints: ["Device ecosystem fragmentation leading to inconsistent user experiences across different platforms and difficulties in managing multiple devices seamlessly",
+                        "Growing privacy concerns among users regarding data collection, storage, and sharing practices in an increasingly connected digital landscape",
+                        "High product costs creating barriers to entry for potential customers and challenges in maintaining market share in price-sensitive segments"],
+                insights: ["Growing demand for seamless integration", "Increasing focus on data protection", "Willingness to pay for premium user experience"],
+                audiences: ["Tech-savvy professionals", "Creative industry workers", "Affluent consumers"]
+            },
+            {
+                brand: "Microsoft",
+                industry: "tech",
+                painPoints: ["Complex software learning curves", "Integration issues across platforms", "Cybersecurity threats"],
+                insights: ["Rising need for collaborative tools", "Shift towards cloud-based solutions", "Demand for enhanced productivity software"],
+                audiences: ["Enterprise businesses", "Educational institutions", "Small to medium-sized companies"]
+            },
+            {
+                brand: "Google",
+                industry: "tech",
+                painPoints: ["Information overload", "Ad intrusiveness", "Data privacy concerns"],
+                insights: ["Increasing reliance on search engines", "Growing importance of targeted advertising", "Rising interest in AI and machine learning"],
+                audiences: ["Internet users worldwide", "Digital marketers", "Mobile device users"]
+            },
+            {
+                brand: "Amazon",
+                industry: "tech",
+                painPoints: ["Counterfeit products", "Delivery speed expectations", "Small business competition"],
+                insights: ["Shift towards online shopping", "Demand for faster delivery options", "Interest in voice-activated shopping"],
+                audiences: ["Online shoppers", "Prime members", "Third-party sellers"]
+            },
+            {
+                brand: "Facebook",
+                industry: "tech",
+                painPoints: ["Fake news proliferation", "Privacy scandals", "Younger user base erosion"],
+                insights: ["Growing importance of social connections", "Increasing video content consumption", "Rising interest in virtual reality"],
+                audiences: ["Social media users", "Advertisers", "Content creators"]
+            },
+            {
+                brand: "Netflix",
+                industry: "tech",
+                painPoints: ["Content library limitations", "Increasing competition", "Rising production costs"],
+                insights: ["Binge-watching culture", "Demand for original content", "Shift away from traditional TV"],
+                audiences: ["Cord-cutters", "Movie and TV enthusiasts", "International viewers"]
+            },
+            {
+                brand: "Intel",
+                industry: "tech",
+                painPoints: ["Moore's Law slowdown", "Competition from ARM-based chips", "Manufacturing process challenges"],
+                insights: ["Increasing demand for processing power", "Growing importance of AI and machine learning", "Rise of edge computing"],
+                audiences: ["PC manufacturers", "Data center operators", "Gaming enthusiasts"]
+            },
+            {
+                brand: "Adobe",
+                industry: "tech",
+                painPoints: ["Steep learning curve for software", "High subscription costs", "Piracy issues"],
+                insights: ["Growing demand for creative tools", "Shift towards cloud-based software", "Increasing importance of digital content creation"],
+                audiences: ["Graphic designers", "Photographers", "Digital marketing professionals"]
+            },
+            {
+                brand: "Salesforce",
+                industry: "tech",
+                painPoints: ["Complex implementation process", "Data silos", "High customization costs"],
+                insights: ["Increasing focus on customer relationships", "Growing need for data-driven decision making", "Rise of remote work"],
+                audiences: ["Sales teams", "Customer service departments", "Marketing professionals"]
+            },
+            {
+                brand: "Nvidia",
+                industry: "tech",
+                painPoints: ["High GPU prices", "Cryptocurrency mining impact", "Power consumption concerns"],
+                insights: ["Growing demand for AI and deep learning", "Increasing popularity of PC gaming", "Rise of ray tracing technology"],
+                audiences: ["Gamers", "Data scientists", "Visual effects studios"]
+            },
+            // Apparel Industry
+            {
+                brand: "Nike",
+                industry: "apparel",
+                painPoints: ["Counterfeiting issues", "Fast fashion competition", "Sustainability concerns"],
+                insights: ["Growing athleisure trend", "Increasing focus on personalization", "Rising demand for eco-friendly products"],
+                audiences: ["Athletes", "Fitness enthusiasts", "Fashion-conscious youth"]
+            },
+            {
+                brand: "Adidas",
+                industry: "apparel",
+                painPoints: ["Market saturation", "Supply chain disruptions", "Changing retail landscape"],
+                insights: ["Growing interest in retro styles", "Increasing demand for sustainable materials", "Rise of streetwear culture"],
+                audiences: ["Sports enthusiasts", "Urban fashion lovers", "Environmentally conscious consumers"]
+            },
+            {
+                brand: "Zara",
+                industry: "apparel",
+                painPoints: ["Fast fashion criticism", "Inventory management challenges", "Online-offline integration"],
+                insights: ["Demand for latest fashion trends", "Growing importance of social media influence", "Increasing focus on in-store experiences"],
+                audiences: ["Fashion-forward young adults", "Budget-conscious shoppers", "Trend-setters"]
+            },
+            {
+                brand: "H&M",
+                industry: "apparel",
+                painPoints: ["Overproduction issues", "Sustainability concerns", "Fierce competition"],
+                insights: ["Growing demand for affordable fashion", "Increasing interest in collaborative collections", "Rising importance of circular fashion"],
+                audiences: ["Budget-conscious fashionistas", "Younger generations", "Sustainability-minded consumers"]
+            },
+            {
+                brand: "Lululemon",
+                industry: "apparel",
+                painPoints: ["Product quality issues", "Limited size range", "High prices"],
+                insights: ["Growing yoga and wellness trends", "Increasing demand for athleisure", "Rising interest in technical fabrics"],
+                audiences: ["Yoga practitioners", "Fitness enthusiasts", "Affluent health-conscious consumers"]
+            },
+            {
+                brand: "Uniqlo",
+                industry: "apparel",
+                painPoints: ["Brand differentiation", "Weather-dependent sales", "Cultural adaptation in new markets"],
+                insights: ["Demand for minimalist design", "Growing interest in functional clothing", "Increasing focus on basics and essentials"],
+                audiences: ["Minimalism enthusiasts", "Quality-conscious consumers", "Urban professionals"]
+            },
+            {
+                brand: "Gucci",
+                industry: "apparel",
+                painPoints: ["Counterfeit products", "Maintaining exclusivity", "Appealing to younger generations"],
+                insights: ["Growing interest in luxury streetwear", "Increasing importance of brand heritage", "Rising demand for unique, artistic designs"],
+                audiences: ["Luxury consumers", "Fashion enthusiasts", "Status-conscious individuals"]
+            },
+            {
+                brand: "The North Face",
+                industry: "apparel",
+                painPoints: ["Seasonality of sales", "Balancing performance and style", "Sustainability challenges"],
+                insights: ["Growing outdoor recreation trend", "Increasing demand for versatile outerwear", "Rising interest in sustainable materials"],
+                audiences: ["Outdoor enthusiasts", "Urban explorers", "Environmentally conscious consumers"]
+            },
+            {
+                brand: "Under Armour",
+                industry: "apparel",
+                painPoints: ["Intense competition", "Maintaining innovation", "Expanding beyond performance wear"],
+                insights: ["Growing interest in performance-enhancing clothing", "Increasing focus on data-driven fitness", "Rising demand for versatile athletic wear"],
+                audiences: ["Serious athletes", "Fitness technology enthusiasts", "Active lifestyle consumers"]
+            },
+            {
+                brand: "Patagonia",
+                industry: "apparel",
+                painPoints: ["Balancing growth and sustainability", "Premium pricing", "Maintaining authenticity"],
+                insights: ["Growing environmental awareness", "Increasing demand for durable products", "Rising interest in corporate responsibility"],
+                audiences: ["Outdoor enthusiasts", "Environmentally conscious consumers", "Socially responsible shoppers"]
+            },
+            // Automotive Industry
+            {
+                brand: "Tesla",
+                industry: "automotive",
+                painPoints: ["Range anxiety", "High vehicle costs", "Production scaling challenges"],
+                insights: ["Growing interest in electric vehicles", "Increasing focus on autonomous driving", "Rising demand for sustainable transportation"],
+                audiences: ["Tech enthusiasts", "Environmentally conscious drivers", "Luxury car buyers"]
+            },
+            {
+                brand: "Toyota",
+                industry: "automotive",
+                painPoints: ["Adapting to electric vehicle market", "Balancing efficiency and performance", "Maintaining brand loyalty"],
+                insights: ["Growing demand for hybrid vehicles", "Increasing focus on safety features", "Rising interest in affordable reliability"],
+                audiences: ["Families", "Commuters", "Value-conscious car buyers"]
+            },
+            {
+                brand: "Volkswagen",
+                industry: "automotive",
+                painPoints: ["Emissions scandal aftermath", "Electric vehicle transition", "Market share in emerging markets"],
+                insights: ["Increasing demand for compact SUVs", "Growing interest in car connectivity", "Rising focus on rebuilding trust"],
+                audiences: ["European car enthusiasts", "Young professionals", "Environmentally aware drivers"]
+            },
+            {
+                brand: "Ford",
+                industry: "automotive",
+                painPoints: ["Shifting away from sedans", "Adapting to electric vehicle market", "Balancing traditional and future mobility"],
+                insights: ["Growing demand for pickup trucks and SUVs", "Increasing interest in mobility services", "Rising focus on American-made vehicles"],
+                audiences: ["Truck and SUV enthusiasts", "American car loyalists", "Fleet and commercial buyers"]
+            },
+            {
+                brand: "BMW",
+                industry: "automotive",
+                painPoints: ["Balancing performance and electrification", "Maintaining premium brand image", "Competition in luxury EV market"],
+                insights: ["Growing demand for luxury EVs", "Increasing focus on digital experiences", "Rising interest in personalization"],
+                audiences: ["Luxury car enthusiasts", "Tech-savvy professionals", "Performance driving fans"]
+            },
+            {
+                brand: "Honda",
+                industry: "automotive",
+                painPoints: ["Adapting to rapidly changing regulations", "Balancing global and regional needs", "Maintaining reputation for reliability"],
+                insights: ["Growing demand for fuel-efficient vehicles", "Increasing interest in compact SUVs", "Rising focus on affordable technology"],
+                audiences: ["First-time car buyers", "Commuters", "Practical, value-oriented consumers"]
+            },
+            {
+                brand: "General Motors",
+                industry: "automotive",
+                painPoints: ["Transitioning to all-electric lineup", "Overcoming past quality perceptions", "Competing in the autonomous vehicle space"],
+                insights: ["Growing interest in American-made EVs", "Increasing demand for advanced driver assistance", "Rising focus on reinventing classic brands"],
+                audiences: ["EV curious consumers", "Tech-forward drivers", "American car enthusiasts"]
+            },
+            {
+                brand: "Mercedes-Benz",
+                industry: "automotive",
+                painPoints: ["Balancing luxury and sustainability", "Adapting to changing luxury market", "Competing in high-end EV space"],
+                insights: ["Growing demand for sustainable luxury", "Increasing focus on in-car technology", "Rising interest in electric performance"],
+                audiences: ["Luxury car buyers", "Tech-savvy professionals", "Status-conscious consumers"]
+            },
+            {
+                brand: "Hyundai",
+                industry: "automotive",
+                painPoints: ["Overcoming budget brand perception", "Expanding EV lineup", "Competing in saturated markets"],
+                insights: ["Growing demand for value-packed vehicles", "Increasing interest in long warranties", "Rising focus on design-led approach"],
+                audiences: ["Budget-conscious buyers", "First-time car owners", "Design-appreciative consumers"]
+            },
+            {
+                brand: "Porsche",
+                industry: "automotive",
+                painPoints: ["Maintaining sports car DNA in EV era", "Expanding beyond niche market", "Balancing exclusivity and growth"],
+                insights: ["Growing interest in high-performance EVs", "Increasing demand for sporty SUVs", "Rising focus on track-ready street cars"],
+                audiences: ["Sports car enthusiasts", "High-income professionals", "Automotive purists"]
+            },
+            // Travel Industry
+            {
+                brand: "Airbnb",
+                industry: "travel",
+                painPoints: ["Regulatory challenges", "Inconsistent property quality", "Safety concerns"],
+                insights: ["Growing desire for unique, local experiences", "Increasing demand for long-term stays", "Rising interest in workations"],
+                audiences: ["Millennials and Gen Z travelers", "Digital nomads", "Experience-seeking tourists"]
+            },
+            {
+                brand: "Expedia",
+                industry: "travel",
+                painPoints: ["Intense online competition", "Dependency on supplier relationships", "Adapting to post-pandemic travel"],
+                insights: ["Growing demand for package deals", "Increasing focus on mobile bookings", "Rising interest in flexible cancellation policies"],
+                audiences: ["Budget-conscious travelers", "Family vacationers", "Last-minute bookers"]
+            },
+            {
+                brand: "Marriott International",
+                industry: "travel",
+                painPoints: ["Recovering from pandemic impact", "Competing with alternative accommodations", "Maintaining brand standards across properties"],
+                insights: ["Growing interest in contactless services", "Increasing demand for loyalty program value", "Rising focus on bleisure travel"],
+                audiences: ["Business travelers", "Luxury seekers", "Loyalty program members"]
+            },
+            {
+                brand: "Delta Air Lines",
+                industry: "travel",
+                painPoints: ["Fluctuating fuel costs", "Managing flight delays and cancellations", "Competing in price-sensitive market"],
+                insights: ["Growing demand for premium economy", "Increasing focus on sustainability", "Rising interest in seamless travel experiences"],
+                audiences: ["Frequent flyers", "Business travelers", "Comfort-seeking passengers"]
+            },
+            {
+                brand: "TripAdvisor",
+                industry: "travel",
+                painPoints: ["Ensuring review authenticity", "Monetizing user-generated content", "Competing with Google's travel features"],
+                insights: ["Growing reliance on peer reviews", "Increasing demand for experience bookings", "Rising interest in sustainable tourism"],
+                audiences: ["Research-oriented travelers", "Experience seekers", "User-review trusters"]
+            },
+            {
+                brand: "TripAdvisor",
+                industry: "travel",
+                painPoints: ["Ensuring review authenticity", "Monetizing user-generated content", "Competing with Google's travel features"],
+                insights: ["Growing reliance on peer reviews", "Increasing demand for experience bookings", "Rising interest in sustainable tourism"],
+                audiences: ["Research-oriented travelers", "Experience seekers", "User-review trusters"]
+            },
+            {
+                brand: "Booking.com",
+                industry: "travel",
+                painPoints: ["High competition in online booking", "Balancing hotel and alternative accommodations", "Adapting to changing travel restrictions"],
+                insights: ["Growing demand for last-minute bookings", "Increasing focus on personalized recommendations", "Rising interest in 'book now, pay later' options"],
+                audiences: ["Deal-seeking travelers", "International tourists", "Business and leisure combination travelers"]
+            },
+            {
+                brand: "Hilton",
+                industry: "travel",
+                painPoints: ["Recovering from pandemic impact", "Competing with vacation rentals", "Maintaining brand consistency globally"],
+                insights: ["Growing demand for extended stay options", "Increasing focus on health and wellness amenities", "Rising interest in digital room keys"],
+                audiences: ["Business travelers", "Families", "Loyalty program enthusiasts"]
+            },
+            {
+                brand: "Uber",
+                industry: "travel",
+                painPoints: ["Regulatory challenges in different markets", "Driver retention and satisfaction", "Balancing growth and profitability"],
+                insights: ["Growing demand for multi-modal transportation", "Increasing focus on safety features", "Rising interest in subscription services"],
+                audiences: ["Urban commuters", "Night-out goers", "Travelers in unfamiliar cities"]
+            },
+            {
+                brand: "Ryanair",
+                industry: "travel",
+                painPoints: ["Managing customer service reputation", "Dealing with union disputes", "Adapting to environmental regulations"],
+                insights: ["Growing demand for ultra-low-cost travel", "Increasing willingness to pay for extras", "Rising interest in secondary airports"],
+                audiences: ["Budget-conscious travelers", "Weekend trip takers", "Students and young adults"]
+            },
+            // Food Industry
+            {
+                brand: "Beyond Meat",
+                industry: "food",
+                painPoints: ["Skepticism about plant-based meat", "Intense competition in alternative protein", "Achieving price parity with animal meat"],
+                insights: ["Growing interest in sustainable eating", "Increasing demand for healthier food options", "Rising focus on animal welfare"],
+                audiences: ["Health-conscious consumers", "Environmentally aware individuals", "Flexitarians"]
+            },
+            {
+                brand: "Nestlé",
+                industry: "food",
+                painPoints: ["Adapting to health-conscious consumers", "Managing diverse global product portfolio", "Addressing plastic packaging concerns"],
+                insights: ["Growing demand for personalized nutrition", "Increasing focus on plant-based options", "Rising interest in functional foods"],
+                audiences: ["Families", "Health-oriented consumers", "Convenience seekers"]
+            },
+            {
+                brand: "Starbucks",
+                industry: "food",
+                painPoints: ["Managing high operational costs", "Maintaining consistency across franchises", "Competing with local coffee shops"],
+                insights: ["Growing demand for premium coffee experiences", "Increasing focus on mobile ordering and payment", "Rising interest in sustainability practices"],
+                audiences: ["Coffee enthusiasts", "On-the-go professionals", "Millennials and Gen Z"]
+            },
+            {
+                brand: "McDonald's",
+                industry: "food",
+                painPoints: ["Adapting menu to health trends", "Managing franchise relationships", "Competing with fast-casual restaurants"],
+                insights: ["Growing demand for all-day breakfast", "Increasing focus on drive-thru efficiency", "Rising interest in plant-based menu options"],
+                audiences: ["Families with children", "Value-seeking diners", "Late-night eaters"]
+            },
+            {
+                brand: "Whole Foods Market",
+                industry: "food",
+                painPoints: ["High price perception", "Integrating with Amazon's ecosystem", "Competing with conventional grocers offering organic options"],
+                insights: ["Growing demand for organic and natural products", "Increasing focus on local sourcing", "Rising interest in transparency and traceability"],
+                audiences: ["Health-conscious shoppers", "Organic food enthusiasts", "Affluent urban dwellers"]
+            },
+            {
+                brand: "Impossible Foods",
+                industry: "food",
+                painPoints: ["Scaling production to meet demand", "Educating consumers about plant-based meat", "Competing in a crowded alternative protein market"],
+                insights: ["Growing concern for environmental sustainability", "Increasing interest in food technology", "Rising demand for familiar flavors in plant-based options"],
+                audiences: ["Environmentally conscious consumers", "Curious meat-eaters", "Food tech enthusiasts"]
+            },
+            {
+                brand: "Coca-Cola",
+                industry: "food",
+                painPoints: ["Declining soda consumption in developed markets", "Plastic waste concerns", "Adapting to health-conscious consumer preferences"],
+                insights: ["Growing demand for low/no-sugar options", "Increasing interest in functional beverages", "Rising focus on sustainable packaging"],
+                audiences: ["Soda lovers", "Health-conscious consumers", "Young adults and teenagers"]
+            },
+            {
+                brand: "Unilever",
+                industry: "food",
+                painPoints: ["Managing diverse brand portfolio", "Adapting to changing consumer preferences", "Addressing sustainability concerns"],
+                insights: ["Growing demand for plant-based foods", "Increasing focus on purpose-driven brands", "Rising interest in premium home cooking products"],
+                audiences: ["Conscious consumers", "Families", "Cooking enthusiasts"]
+            },
+            {
+                brand: "Domino's Pizza",
+                industry: "food",
+                painPoints: ["Managing delivery logistics", "Competing with food delivery apps", "Maintaining food quality during delivery"],
+                insights: ["Growing demand for contactless delivery", "Increasing focus on digital ordering platforms", "Rising interest in customization options"],
+                audiences: ["Convenience-seeking diners", "College students", "Families looking for easy meals"]
+            },
+            {
+                brand: "Oatly",
+                industry: "food",
+                painPoints: ["Scaling production to meet demand", "Educating consumers about plant-based milk", "Competing with established dairy companies"],
+                insights: ["Growing lactose intolerance awareness", "Increasing focus on sustainability in food choices", "Rising interest in barista-friendly plant milks"],
+                audiences: ["Dairy-alternative seekers", "Environmentally conscious consumers", "Coffee and tea enthusiasts"]
+            }
         ];
-        const mediums = ["Film/Video", "Digital Ad", "Print Ad", "Social Media Campaign", "Billboard"];
-        const painPoints = {
-            tech: [
-                "Tech companies often struggle to differentiate their products in a crowded market. We need to create a campaign that highlights our unique features and communicates our value proposition in an impactful way.",
-                "The tech industry is constantly evolving, and our customers need reassurance that our products are cutting-edge. We need to build a campaign that highlights our innovation and industry leadership.",
-                "Customer trust is essential for our tech brand. We need a campaign that emphasizes our commitment to privacy and data security, ensuring our customers feel confident in our products.",
-                "Our tech brand needs to educate users on how our products integrate into their daily workflow. A campaign focused on ease of use and productivity can be effective.",
-                "Tech audiences are overwhelmed by choices. We need to simplify our offering and convey the benefits clearly to drive conversions.",
-                "Our tech products are complex, and customers may not understand their full capabilities. A campaign that demystifies our products and shows practical applications can drive adoption.",
-                "Competition in the tech space is driving price wars. We need a campaign that focuses on quality and value beyond just pricing.",
-                "Tech users are concerned about environmental impact. A campaign that highlights our sustainability initiatives can improve brand perception.",
-                "Brand loyalty is declining due to new competitors. We need to launch a campaign that reinforces why our brand is still the best choice.",
-                "Our tech brand needs to appeal to non-tech-savvy consumers. We need a campaign that simplifies technical jargon and emphasizes user-friendly features."
-            ],
-            fashion: [
-                "The fashion market is fiercely competitive, and we need to create buzz around our latest collection. Our campaign should emphasize our unique style, quality, and connection to fashion trends.",
-                "Sustainability is increasingly important in fashion, and we want to highlight our eco-friendly initiatives. We need a campaign that resonates with environmentally conscious consumers and showcases our efforts.",
-                "Our fashion brand needs to connect with younger audiences. We want a campaign that speaks directly to Gen Z's sense of style and individuality, making our brand a top choice for their wardrobe.",
-                "Consumers are seeking versatility in their fashion choices. We need a campaign that highlights how our pieces can be styled in multiple ways.",
-                "Our brand needs to increase awareness of our inclusive sizing options. A campaign that showcases diverse body types will resonate with a broader audience.",
-                "Fast fashion is facing backlash. We need to position our brand as a sustainable and high-quality alternative.",
-                "Customers are looking for clothing that aligns with their values. A campaign focusing on our ethical manufacturing processes could appeal to this audience.",
-                "We need to drive sales for a new seasonal collection. A campaign that emphasizes limited availability and urgency can create demand.",
-                "Our brand wants to emphasize luxury. A campaign that conveys exclusivity and high-end appeal will attract the right audience.",
-                "Fashion consumers are increasingly influenced by social media. We need a campaign that involves influencers to boost credibility and engagement."
-            ],
-            lifestyle: [
-                "Our lifestyle brand needs to establish itself as an essential part of our customers' daily lives. We need a campaign that highlights how our products can improve their overall well-being and happiness.",
-                "The lifestyle space is all about creating memorable experiences. We need a campaign that shows how our products bring convenience, comfort, and joy into the lives of our target audience.",
-                "Our brand needs to boost its presence on social media and attract lifestyle influencers. A creative campaign that leverages influencer partnerships can help us reach new audiences and build credibility.",
-                "Our products are designed to simplify home life. We need a campaign that shows real-life examples of how our brand makes daily routines easier.",
-                "Our lifestyle brand is seen as outdated. We need a modern refresh, showcasing how our products align with contemporary living.",
-                "We want to highlight our brand's role in promoting mental well-being. A campaign focusing on relaxation and stress relief will resonate with our target audience.",
-                "Lifestyle consumers are moving towards minimalism. We need a campaign that highlights the simplicity and elegance of our offerings.",
-                "Our products are perfect for families. A campaign that showcases family moments with our products will help connect emotionally with parents.",
-                "We want to drive interest in our premium offerings. A campaign focusing on the craftsmanship and quality of our products will elevate our brand.",
-                "Our brand needs to connect with pet owners. A campaign that shows how our lifestyle products make life easier for pet lovers can attract this segment."
-            ],
-            beverage: [
-                "Our beverage brand needs to stand out among numerous competitors. We need a campaign that highlights our unique flavor and brand story, making it appealing to our target audience.",
-                "Health-conscious consumers are a growing segment, and our brand needs to appeal to them. We need a campaign that emphasizes our healthy ingredients and aligns with their lifestyle choices.",
-                "We want to establish our beverage as the perfect choice for social gatherings. Our campaign should evoke a sense of fun, energy, and togetherness, making our brand synonymous with good times.",
-                "Our beverage is seen as a traditional choice. We need a campaign that modernizes our image and makes us relevant to younger audiences.",
-                "We need to introduce a new flavor to the market. A campaign that emphasizes excitement and curiosity will help attract adventurous consumers.",
-                "Our brand needs to be positioned as the go-to drink for active individuals. A campaign focusing on hydration and energy can appeal to fitness enthusiasts.",
-                "We want to highlight our commitment to sustainability. A campaign that showcases our eco-friendly packaging and sourcing can attract environmentally conscious consumers.",
-                "Our brand needs to boost loyalty in a crowded market. A campaign that promotes a rewards program can incentivize repeat purchases.",
-                "We need to increase our presence in the premium beverage segment. A campaign that emphasizes quality ingredients and craftsmanship will appeal to upscale consumers.",
-                "Our brand wants to create nostalgia. A campaign that connects our beverage with fond memories from childhood could emotionally resonate with our audience."
-            ],
-            automotive: [
-                "Our automotive brand needs to highlight its safety features to appeal to families. We need a campaign that effectively communicates our commitment to safety and reliability.",
-                "Electric vehicles are becoming more popular, and we need to promote our EV lineup. Our campaign should focus on innovation, sustainability, and the benefits of switching to electric.",
-                "We want to position our brand as a luxury option for discerning drivers. Our campaign needs to emphasize performance, comfort, and the premium experience that our vehicles provide.",
-                "Our brand needs to appeal to adventure seekers. A campaign that showcases off-road capabilities and rugged features will attract this audience.",
-                "Fuel efficiency is a major concern for consumers. We need a campaign that highlights the cost savings and environmental benefits of our fuel-efficient models.",
-                "Our brand wants to drive awareness of our electric charging network. A campaign that demonstrates the ease and convenience of charging will help alleviate range anxiety.",
-                "We need to promote our connected car features. A campaign that highlights the convenience and safety of smart technology integration will resonate with tech-savvy consumers.",
-                "Our automotive brand wants to appeal to young professionals. A campaign focusing on sleek design and affordability will make our vehicles more attractive to this segment.",
-                "We need to promote our brand's history and heritage. A campaign that emphasizes tradition, craftsmanship, and a legacy of excellence will boost credibility.",
-                "Our brand needs to highlight post-purchase services. A campaign that emphasizes maintenance packages and warranty benefits can help reassure potential buyers."
-            ]
-        };
-        const audiences = [
-            "Millennials",
-            "Gen Z",
-            "Young Professionals",
-            "Parents",
-            "Tech Enthusiasts",
-            "Sports Fans",
-            "Fashion Enthusiasts",
-            "Health and Wellness Seekers",
-            "Eco-conscious Consumers",
-            "Luxury Shoppers",
-            "Family-oriented Individuals",
-            "Outdoor Adventurers",
-            "Gamers",
-            "Home Decor Lovers",
-            "Busy Professionals",
-            "Social Media Influencers",
-            "Pet Owners",
-            "College Students",
-            "Fitness Buffs",
-            "Urban Dwellers"
-        ];
+        let currentBrief = null;
+        let previousBrief = null;
 
         function generateBrief() {
-            const brandType = document.getElementById("brandType").value;
-            let filteredBrands;
-
-            switch (brandType) {
-                case 'tech':
-                    filteredBrands = brands.slice(0, 50);
-                    break;
-                case 'fashion':
-                    filteredBrands = ["Nike", "Adidas", "Gucci", "Louis Vuitton", "Chanel", "Prada", "H&M", "Zara", "Uniqlo", "Levi's", "Burberry", "Versace", "Balenciaga", "Ralph Lauren", "Tommy Hilfiger", "Calvin Klein", "The North Face", "Columbia", "Under Armour", "Puma"]
-                    break;
-                case 'lifestyle':
-                    filteredBrands = ["IKEA", "MUJI", "Target", "Walmart", "Bed Bath & Beyond", "Wayfair", "Home Depot", "Pottery Barn", "West Elm", "Crate & Barrel", "Pier 1", "CB2", "Kirkland's", "Cost Plus World Market", "Big Lots", "Williams-Sonoma", "Urban Outfitters", "Anthropologie", "Room & Board", "Ashley HomeStore"]
-                    break;
-                case 'beverage':
-                    filteredBrands = ["Coca-Cola", "Pepsi", "Starbucks", "Red Bull", "Monster", "Nestle", "Sprite", "Fanta", "Dr Pepper", "Minute Maid", "Gatorade", "Powerade", "Lipton", "Arizona", "Mountain Dew", "Snapple", "Tropicana", "LaCroix", "Perrier", "Evian"]
-                    break;
-                case 'automotive':
-                    filteredBrands = ["Toyota", "Ford", "Chevrolet", "Tesla", "BMW", "Mercedes-Benz", "Audi", "Volkswagen", "Honda", "Nissan", "Hyundai", "Kia", "Subaru", "Volvo", "Jaguar", "Land Rover", "Porsche", "Maserati", "Ferrari", "Lamborghini"]
-                    break;
-                default:
-                    filteredBrands = brands;
+            const selectedIndustry = document.getElementById('industrySelect').value;
+            let filteredBriefs = briefs;
+            
+            if (selectedIndustry !== 'all') {
+                filteredBriefs = briefs.filter(brief => brief.industry === selectedIndustry);
             }
 
-            const brand = filteredBrands[Math.floor(Math.random() * filteredBrands.length)];
-            const mediumType = document.getElementById("mediumType").value;
-            const medium = mediumType === 'video' ? 'Film/Video' : mediumType === 'digital' ? 'Digital Ad' : mediumType === 'print' ? 'Print Ad' : mediumType === 'social_media' ? 'Social Media Campaign' : 'Billboard';
-            const brandPainPoints = painPoints[brandType];
-            const painPoint = brandPainPoints[Math.floor(Math.random() * brandPainPoints.length)];
-            let audience;
-            do {
-                audience = audiences[Math.floor(Math.random() * audiences.length)];
-            } while (
-                (brandType === 'tech' && (audience === 'Sports Fans' || audience === 'Luxury Shoppers' || audience === 'Home Decor Lovers' || audience === 'Pet Owners')) ||
-                (brandType === 'fashion' && (audience === 'Tech Enthusiasts' || audience === 'Gamers' || audience === 'Home Decor Lovers' || audience === 'Outdoor Adventurers')) ||
-                (brandType === 'lifestyle' && (audience === 'Tech Enthusiasts' || audience === 'Gamers' || audience === 'Luxury Shoppers')) ||
-                (brandType === 'beverage' && (audience === 'Tech Enthusiasts' || audience === 'Gamers' || audience === 'Luxury Shoppers')) ||
-                (brandType === 'automotive' && (audience === 'Gen Z' || audience === 'Fashion Enthusiasts' || audience === 'Home Decor Lovers'))
-            );
+            if (filteredBriefs.length === 0) {
+                document.getElementById('brief').innerHTML = "<p>No brands available for the selected industry. Please try another industry.</p>";
+                document.getElementById('downloadPdf').style.display = 'none';
+                document.getElementById('previousBrief').style.display = 'none';
+                return;
+            }
 
-            function generateInsight(brandType, painPoint, audience) {
-            const insightsMap = {
-                tech: [
-                    `Tech consumers value cutting-edge technology and reliability. ${brand} can leverage ${medium} to demonstrate technological advancements and build trust.`,
-                    `Our audience of ${audience.toLowerCase()} is overwhelmed by choices in the tech market. ${brand} should use ${medium} to simplify its offerings and clearly communicate the benefits.`,
-                    `Privacy concerns are growing among ${audience.toLowerCase()}. ${brand} can use ${medium} to reassure customers about data security and our commitment to privacy.`
-                ],
-                fashion: [
-                    `Fashion audiences like ${audience.toLowerCase()} are showing increased interest in sustainability. ${brand} can use ${medium} to highlight eco-friendly practices and ethical sourcing.`,
-                    `${audience.toLowerCase()} are increasingly looking for unique and personalized fashion options. ${brand} could leverage ${medium} to showcase customized styles that resonate with individuality.`,
-                    `Our audience, ${audience.toLowerCase()}, is highly influenced by social media. ${brand} can collaborate with influencers through ${medium} to build credibility and boost engagement.`
-                ],
-                lifestyle: [
-                    `Lifestyle consumers, such as ${audience.toLowerCase()}, seek products that enhance comfort and convenience. ${brand} should focus on how its offerings fit seamlessly into daily routines through ${medium}.`,
-                    `${audience.toLowerCase()} value minimalistic and elegant designs. ${brand} can utilize ${medium} to highlight how our products bring simplicity and beauty into their homes.`,
-                    `Our lifestyle brand needs to connect with families. ${brand} should use ${medium} to showcase family moments and illustrate how our products bring families closer together.`
-                ],
-                beverage: [
-                    `Health-conscious consumers like ${audience.toLowerCase()} are becoming more prevalent. ${brand} can use ${medium} to emphasize natural ingredients and health benefits.`,
-                    `${audience.toLowerCase()} seek experiences that connect them emotionally to a brand. ${brand} could use ${medium} to create moments of joy that become synonymous with our beverage.`,
-                    `Our audience, ${audience.toLowerCase()}, is interested in social gatherings and celebrations. ${brand} can leverage ${medium} to associate our beverage with fun, energy, and good times.`
-                ],
-                automotive: [
-                    `Safety is a top concern for ${audience.toLowerCase()}. ${brand} can use ${medium} to emphasize our vehicle safety features and build trust among families.`,
-                    `Our ${audience.toLowerCase()} audience is drawn to sustainable automotive options. ${brand} should use ${medium} to highlight electric and hybrid vehicle benefits.`,
-                    `${audience.toLowerCase()} value both performance and luxury. ${brand} can use ${medium} to showcase our vehicles' power, comfort, and exclusivity.`
-                ]
+            // Store the current brief as the previous brief
+            if (currentBrief) {
+                previousBrief = currentBrief;
+                document.getElementById('previousBrief').style.display = 'block';
+            }
+
+            const randomBrief = filteredBriefs[Math.floor(Math.random() * filteredBriefs.length)];
+            
+            const randomPainPoint = randomBrief.painPoints[Math.floor(Math.random() * randomBrief.painPoints.length)];
+            const randomInsight = randomBrief.insights[Math.floor(Math.random() * randomBrief.insights.length)];
+            const randomAudience = randomBrief.audiences[Math.floor(Math.random() * randomBrief.audiences.length)];
+
+            currentBrief = {
+                industry: randomBrief.industry,
+                brand: randomBrief.brand,
+                painPoint: randomPainPoint,
+                insight: randomInsight,
+                audience: randomAudience
             };
 
-            return insightsMap[brandType][Math.floor(Math.random() * insightsMap[brandType].length)];
+            displayBrief(currentBrief);
         }
-            const insights = generateInsight(brandType, painPoint, audience);
 
-            const brandVoices = [
-                "Friendly and Approachable",
-                "Bold and Confident",
-                "Luxury and Sophisticated",
-                "Playful and Witty",
-                "Professional and Trustworthy",
-                "Inspirational and Uplifting",
-                "Innovative and Cutting-edge",
-                "Calm and Reassuring",
-                "Energetic and Exciting",
-                "Community-focused and Inclusive"
-            ];
-            const brandVoice = brandVoices[Math.floor(Math.random() * brandVoices.length)];
-
-            const campaignFocusOptions = {
-                "Sony": ["Headphone product", "New gaming console launch", "Camera innovation campaign", "Television promotion", "Home audio system", "Wearable tech release", "Mobile phone accessory", "Collaboration with musicians", "Gamer sponsorship", "Content creation tools"],
-                "Adidas": ["New running shoe launch", "Sportswear collection", "Sponsorship for a major sports event", "Fitness app integration", "Collaboration with athletes", "Lifestyle sneaker release", "Limited-edition apparel drop", "Outdoor gear promotion", "Yoga collection", "Community fitness challenge"],
-                "Tesla": ["Electric vehicle performance", "Autonomous driving feature", "Sustainable energy campaign", "Battery technology promotion", "Solar roof awareness", "Charging infrastructure expansion", "Luxury EV experience", "Fleet solutions for businesses", "Road safety features", "Environmental impact awareness"],
-                "Coca-Cola": ["Summer refreshment campaign", "Limited-edition flavor", "Community sponsorship", "Holiday special drink", "Sports event partnership", "Local festival sponsorship", "Classic product nostalgia", "Music festival collaboration", "Health-conscious alternatives", "Global unity campaign"],
-                "IKEA": ["New furniture collection", "Home organization solutions", "Affordable style campaign", "Sustainable living products", "Seasonal decor ideas", "Small space solutions", "DIY furniture kits", "Child-friendly products", "Outdoor furniture collection", "Lighting innovations"],
-                "Nike": ["New athletic shoe", "Performance apparel", "Sports charity partnership", "Athlete testimonial campaign", "Women's fitness initiative", "Running club promotion", "Sustainable footwear", "Limited-edition sneaker drop", "Football gear", "Urban streetwear collection"],
-                "Apple": ["New iPhone release", "MacBook Pro campaign", "Apple Watch health features", "Augmented reality apps", "Privacy and security awareness", "iPad for creatives", "Educational tools for students", "Music creation tools", "iCloud services", "Environmental initiatives"],
-                "Starbucks": ["New seasonal drink", "Sustainable sourcing campaign", "Rewards program promotion", "Community engagement events", "Barista storytelling", "Vegan menu options", "Cold brew campaign", "Holiday-themed drinks", "Artisan roasts", "Drive-thru convenience"],
-                "Samsung": ["Smartphone release", "Home appliance innovation", "Galaxy ecosystem promotion", "Foldable phone introduction", "Smart TV technology", "Wearable health devices", "AI-powered devices", "Connected home solutions", "Gaming monitor promotion", "Digital art creation tools"],
-                "Ford": ["Electric truck launch", "Vehicle safety features", "Off-road capability campaign", "Hybrid vehicle awareness", "Truck durability showcase", "Connected vehicle technology", "Driver assistance features", "Commercial fleet solutions", "Custom vehicle accessories", "Community outreach programs"]
-            };
-            const campaignFocus = campaignFocusOptions[brand] ? campaignFocusOptions[brand][Math.floor(Math.random() * campaignFocusOptions[brand].length)] : "General brand awareness";
-
-            const creativeBrief = `
-                <div><b>Brand:</b> ${brand}</div>
-                <div><b>Medium:</b> ${medium}</div>
-                <div><b>Pain Point:</b> ${painPoint}</div>
-                <div><b>Target Audience:</b> ${audience}</div>
-                <div><b>Insights:</b> ${insights}</div>
-                <div><b>Brand Voice:</b> ${brandVoice}</div>
-                <div><b>Campaign Focus:</b> ${campaignFocus}</div>
+        function displayBrief(brief) {
+            const briefHTML = `
+                <h2>Creative Brief</h2>
+                <p><strong>Industry:</strong> ${brief.industry.charAt(0).toUpperCase() + brief.industry.slice(1)}</p>
+                <p><strong>Brand:</strong> ${brief.brand}</p>
+                <p><strong>Pain Point:</strong> ${brief.painPoint}</p>
+                <p><strong>Key Insight:</strong> ${brief.insight}</p>
+                <p><strong>Target Audience:</strong> ${brief.audience}</p>
             `;
-            document.getElementById("brief").innerHTML = creativeBrief;
-            document.getElementById("downloadButton").style.display = 'block';
-            document.getElementById("downloadButton").style.margin = '0 auto';
-            document.getElementById("downloadButton").style.display = 'flex';
-            document.getElementById("downloadButton").style.justifyContent = 'center';
+
+            document.getElementById('brief').innerHTML = briefHTML;
+            document.getElementById('downloadPdf').style.display = 'block';
+            document.getElementById('placeholderMessage').style.display = 'none';
         }
-    function exportToPDF() {
-            const briefElement = document.getElementById("brief");
-            const briefContent = briefElement.innerHTML;
-            const opt = {
-                margin: 1,
-                filename: 'creative_brief.pdf',
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().from(briefElement).set(opt).save();
+
+        function showPreviousBrief() {
+            if (previousBrief) {
+                displayBrief(previousBrief);
+            }
+        }
+        window.onload = function() {
+            document.getElementById('downloadPdf').style.display = 'none';
+            document.getElementById('previousBrief').style.display = 'none';
+        };
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Set font styles
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(24);
+            doc.setTextColor(44, 62, 80); // Dark blue color
+            
+            // Add title
+            doc.text('Creative Brief', 105, 20, null, null, 'center');
+            
+            // Add a line under the title
+            doc.setLineWidth(0.5);
+            doc.line(20, 25, 190, 25);
+            
+            // Reset font for content
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(12);
+            doc.setTextColor(52, 73, 94); // Slightly lighter blue for content
+            
+            // Get content and split into sections
+            const content = document.getElementById('brief').innerText.split('\n');
+            let yPos = 40;
+            
+            content.forEach((line, index) => {
+                if (index > 0) { // Skip the "Creative Brief" title
+                    if (line.includes(':')) {
+                        const [key, value] = line.split(':');
+                        doc.setFont("helvetica", "bold");
+                        doc.text(key + ':', 20, yPos);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(value.trim(), 70, yPos);
+                    } else {
+                        doc.text(line, 20, yPos);
+                    }
+                    yPos += 10;
+                }
+            });
+            
+            // Add a border
+            doc.setDrawColor(52, 152, 219); // Blue color for border
+            doc.setLineWidth(2);
+            doc.rect(5, 5, 200, 287);
+            
+            // Add footer
+            doc.setFontSize(10);
+            doc.setTextColor(149, 165, 166); // Gray color for footer
+            doc.text('Generated by Creative Brief Generator', 105, 290, null, null, 'center');
+            
+            doc.save('creative_brief.pdf');
         }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </body>
 </html>
